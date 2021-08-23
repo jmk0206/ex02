@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> <!-- mybatis 매핑된 SQL 구문 살펴보기 -->
+  
+<mapper namespace="org.zerock.mapper.BoardMapper">
+	<select id="getList" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[
+			select * from tbl_board where bno > 0;
+		]]>
+	</select>
+	
+	<select id="getListWidthPaing" resultType="org.zerock.domain.BoardVO">
+		
+			select bno, title, content, writer, regdate, updatedate, replycnt from 
+			(select @rownum:=@rownum+1 as rownum, bno, title, content, writer, regdate, updatedate, replycnt
+            from (select @rownum:=0) as rownum
+            , tbl_board
+            <choose>
+            	<when test="type=='TC'">
+		    		where title like concat('%',#{keyword},'%') or content like concat('%',#{keyword},'%')
+		   		</when>
+		    
+		    	<when test="type=='TW'">
+					where title like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+				</when>
+			
+				<when test="type=='CW'">
+		  			where content like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+		    	</when>
+		    
+		    	<when test="type=='TCW'">
+		   			where title like concat('%',#{keyword},'%') or content like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+		    	</when>
+		    </choose>
+		    order by bno desc
+            )pageboard
+        <![CDATA[
+			where rownum>(#{pageNum}-1)*#{amount} and rownum<=#{pageNum}*#{amount}
+			;
+		]]>
+	</select>
+	
+	<insert id="insert">
+		insert into tbl_board (title,content,writer)
+		values (#{title},#{content},#{writer});
+	</insert>
+	
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="bno" order="BEFORE" resultType="int">
+			select max(bno)+1 from tbl_board;
+		</selectKey>
+		
+		insert into tbl_board (bno,title,content,writer)
+		values (#{bno},#{title},#{content},#{writer});
+	</insert>
+	
+	<select id="read" resultType="org.zerock.domain.BoardVO">
+		select * from tbl_board where bno = #{bno};
+	</select>
+	
+	<delete id="delete">
+		delete from tbl_board where bno=#{bno};
+	</delete>
+	
+	<update id="update">
+		update tbl_board
+		set title=#{title}, content=#{content}, updatedate=sysdate()
+		where bno=#{bno};
+	</update>
+	
+	<select id="getTotalCount" resultType="int">
+		select count(*) from tbl_board
+            <choose>
+            	<when test="type=='TC'">
+		    		where title like concat('%',#{keyword},'%') or content like concat('%',#{keyword},'%')
+		   		</when>
+		    
+		    	<when test="type=='TW'">
+					where title like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+				</when>
+			
+				<when test="type=='CW'">
+		  			where content like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+		    	</when>
+		    
+		    	<when test="type=='TCW'">
+		   			where title like concat('%',#{keyword},'%') or content like concat('%',#{keyword},'%') or writer like concat('%',#{keyword},'%')
+		    	</when>
+		    </choose>
+		;
+	</select> 
+	
+	<update id="updateReplycnt">
+		update tbl_board
+		set replycnt = replycnt + #{amount}
+		where bno = #{bno};
+	</update>
+	
+	
+	
+</mapper>
