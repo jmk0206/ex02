@@ -6,6 +6,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="customAccessDenied" class="org.zerock.security.CustomAccessDeniedHandler"></bean>
+	<bean id="customLoginSuccess" class="org.zerock.security.CustomLoginSuccessHandler"></bean>
 	
 	<security:http>
 		<security:intercept-url pattern="/login/all" access="permitAll"/>
@@ -17,7 +18,10 @@
 		<!-- <security:access-denied-handler error-page="/accessError"/>  -->
 		<security:access-denied-handler ref="customAccessDenied"/>
 		
-		<security:form-login login-page="/customLogin"/>
+		<!-- <security:form-login />  -->
+		<security:form-login login-page="/customLogin" authentication-success-handler-ref="customLoginSuccess" />
+		<security:logout logout-url="/customLogout" invalidate-session="true" />
+		<!-- <security:csrf disabled="true" /> -->
 	</security:http>
 	
 	<security:authentication-manager>

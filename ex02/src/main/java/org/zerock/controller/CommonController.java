@@ -20,7 +20,7 @@ public class CommonController {
 	
 	@GetMapping("/customLogin")
 	public void loginInput(String error, String logout, Model model) {
-		logger.info("login : " + error);
+		logger.info("error : " + error);
 		logger.info("logout : " + logout);
 		
 		if(error!=null) {
@@ -30,5 +30,10 @@ public class CommonController {
 		if(logout!=null) {
 			model.addAttribute("logout", "Logout!!");
 		}
+	}
+	
+	@GetMapping("/customLogout")
+	public void logoutGET() {
+		logger.info("custom logout");
 	}
 }
